@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html lang="en">
+<head>
+<title>pwd</title>
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <!-- Bootstrap -->
+ <link href="{% static "poc/css/bootstrap.min.css" %}" rel="stylesheet">
+ <link href="{% static "poc/css/offcanvas.css" %}" rel="stylesheet"> 
+ <link href="{% static "poc/css/bootstrap-theme.min.css" %}" rel="stylesheet">
+ <link href="{% static "poc/css/bootstrap-dialog.min.css" %}" rel="stylesheet">
+ <link href="{% static "poc/css/dataTables.bootstrap.css" %}" rel="stylesheet">
+ <style>
+	.popover-content{
+	    color: tomato;
+	}
+ </style>
+</head>
+<body>
+<div class="navbar navbar-fixed-top navbar-inverse" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Mesos POC</a>
+        </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Demo</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+          <ul class="navbar-text nav pull-right">
+          <p style="margin:0 0 0px"><span id="a_welcome"></span><a id="a_logout"></a></p>
+          </ul>
+        </div><!-- /.nav-collapse -->
+      </div><!-- /.container -->
+</div><!--nav bar -->
+
+<div class="container">
+
+      <div class="row row-offcanvas row-offcanvas-right">
+
+        <div class="col-xs-16 col-sm-12">
+	  <div id="div_cdap" class="col-xs-16 col-sm-12 panel-body"></div>
+          <div class="panel panel-default">
+				<div class="panel-body">
+					<div id="div_login">
+					<form class="form-inline" role="form">
+						<h4><label>Login</label></h4>
+			  			<div class="form-group">
+	    						<input class="form-control" id="input_user_name" placeholder="Enter account">
+	  					</div>
+	  					<div class="form-group">
+	    						<input type="password" class="form-control" id="input_password" placeholder="Password">
+	  					</div>
+	  					<button id="btn_sign_in" type="button" class="btn btn-info">Sign in</button>
+						<div class="form-group" style="">
+          					<p style="margin:0 0 0 0px"><span id="span_register"></span><a id="a_register">sign up</a></p>
+						</div>
+						<div><span id="span_tip"></span></div>
+					</form>
+					</div>
+					<div id="div_register">
+			    		<form role="form">
+						<h4><label>Register</label></h4>
+			    			<div class="row">
+			    				<div class="col-xs-6 col-sm-6 col-md-6">
+			    				<div class="form-group">
+			                			<input type="text" name="name" id="r_name" class="form-control input-sm" placeholder="Name">
+			    				</div>
+			    				</div>
+			    				<div class="col-xs-6 col-sm-6 col-md-6">
+			    				</div>
+			    			</div>
+			    			<div class="row">
+			    				<div class="col-xs-6 col-sm-6 col-md-6">
+			    					<div class="form-group">
+			    						<input type="password" name="password" id="r_passwd" class="form-control input-sm" placeholder="Password">
+			    					</div>
+			    				</div>
+			    				<div class="col-xs-6 col-sm-6 col-md-6">
+			    				</div>
+
+			    			</div>
+						<div class="row">
+							<div class="col-xs-6 col-sm-6 col-md-6">
+			    					<div class="form-group">
+			    						<input type="password" name="password_confirmation" id="r_cpasswd" class="form-control input-sm" placeholder="Confirm Password">
+			    					</div>
+			    				</div>
+
+			    				<div class="col-xs-6 col-sm-6 col-md-6">
+			    				</div>
+			    			</div>	
+						<input id="btn_register" type="button" value="Register" class="btn btn-info">
+						<div><span id="span_r_tip"></span></div>
+			    		</form>
+					</div>
+            </div>
+          <!--/row-->
+        </div><!--/span-->
+      </div><!--/row-->
+
+
+</div><!-- container -->
+      <hr>
+      
+      <footer>
+        <p>@intel 2015</p>
+        
+      </footer>
+
+ <script src="{% static "poc/js/jquery-2.1.0.min.js" %}"></script>
+ <script src="{% static "poc/js/bootstrap.min.js" %}"></script>
+ <script src="{% static "poc/js/offcanvas.js" %}"></script>
+ <script src="{% static "poc/js/bootstrap-dialog.min.js" %}"></script>
+ <script src="{% static "poc/js/jquery.dataTables.js" %}"></script>
+ <script src="{% static "poc/js/dataTables.bootstrap.js" %}"></script>
+ 
+ <script type="text/javascript">
+	$(document).ready(function(){
+		$("#btn_sign_in").unbind('click').bind("click",sign_in);
+		$("#btn_register").unbind('click').bind("click",do_register);
+		$("#a_register").unbind('click').bind("click",show_register);
+		$("#div_login").hide();
+		$("#div_register").hide();
+		var login_already = 'false';
+		var user_name = '';
+		login_already = '{{login_already}}';
+		
+		if(login_already == 'false'){
+			//login page
+			$("#div_login").show();
+		}else{
+			user_name = '{{name}}';
+			url = '{{cdap_url}}'
+			sign_in_success(user_name);
+			setup_CDAP(url);
+		}
+	});
+	function sign_in(){
+		var user_name = $("#input_user_name").val();
+		var pwd = $("#input_password").val();
+
+		$.ajax({
+			type:'post',
+			url:"accounts/login/",
+			data:{name:user_name,passwd:pwd},
+			dataType:'json',
+			success:function(data,textStatus){
+				console.log(data);
+				if (data["name"] != "") {
+                                	sign_in_success(data["name"]);
+                                        setup_CDAP(data["cdap_url"]);
+				} else {
+					$("#span_tip").text("Login failed!");
+				}
+			},
+			complete:function(data,textStatus){
+			}
+			
+		});
+	}
+	function sign_in_success(name){
+		$("#span_tip").text("");
+		var welcome_info = "welcome, " + name + " | ";
+		$("#a_welcome").text(welcome_info);
+		$("#a_logout").text("Logout");
+		$("#a_logout").unbind('click').bind("click",logout_action);
+		$("#div_login").hide();
+	}
+	function logout_action(){
+		$.ajax({
+			type:'post',
+			url:"accounts/logout/",
+			data:{},
+			dataType:'json',
+			success:function(data,textStatus){
+				clear_page();
+			}
+			
+		});		
+	}
+	function clear_page(){
+		//clear welcome text
+		$("#a_welcome").text("");
+		$("#a_logout").text("");
+		//clear login dialog form
+		$("#input_user_name").val("");
+		$("#input_password").val("");
+		$("#div_login").show();	
+		$("#div_register").hide();
+		$("#div_cdap").html("");
+	}
+	function close_register(){
+		$("#span_r_tip").text("");
+		$("#div_register").hide();
+		$("#r_name").val("");
+		$("#r_passwd").val("");
+	}
+	function show_register(){
+		$("#div_login").hide();
+		$("#div_register").show();
+	}
+	function do_register(){
+		var name = $("#r_name").val();
+		var pwd = $("#r_passwd").val();
+		var c_pwd = $("#r_cpasswd").val();
+		if (name == "") {
+			$("#span_r_tip").text("Empty name");
+			return;
+		}
+		if (pwd == "") {
+			$("#span_r_tip").text("Empty password");
+			return;
+		}
+
+		if (pwd != c_pwd) {
+			$("#span_r_tip").text("The two password are different");
+		}else{
+			$.ajax({
+                        	type:'post',
+                        	url:"accounts/register/",
+                        	data:{name:name,passwd:pwd},
+                        	dataType:'json',
+                        	success:function(data,textStatus){
+					console.log(data);
+                                	if (data["tip"] == "ok") {
+						$("#span_r_tip").text("Redirecting to CDAP..");
+                                		sign_in_success(name);
+                                        	setup_CDAP(data["cdap_url"]);
+						close_register()
+                                	} else if(data["tip"] == "no"){
+                                        	$("#span_r_tip").text("User name already registered!");
+					} else {
+                                        	$("#span_r_tip").text("Setting up VM failed!");
+                                	}
+                        	},
+                        	complete:function(data,textStatus){
+                        	}
+                        
+                	});
+			$("#span_r_tip").text("Registering and setting up your CDAP VM..");
+		}
+
+	}
+	function setup_CDAP(url){
+		console.log(url);
+		url = "http://cmsnmh:8080";
+		var c = "<object data=\"" +
+			url +
+			"\" width=\"100%\" height=\"600px\"" +
+			" />";
+		$("#div_cdap").html(c);
+	}
+	
+ </script>
+ 
+</body>
+</html>

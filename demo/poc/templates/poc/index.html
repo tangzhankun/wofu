@@ -1,0 +1,7 @@
+{% if name  %}
+ welcome, {{ name }}
+<a href = "/accounts/logout/?next=/"> logout </a>
+{% else %}
+<a href = "/accounts/login/?next=/"> login </a>
+<a href = "/accounts/register/?next=/"> register </a>
+{% endif %}
