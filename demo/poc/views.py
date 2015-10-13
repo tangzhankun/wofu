@@ -37,7 +37,9 @@ def startVM(namespace):
     nova = client.Client("2","tangzhankun","123456","tangzhankun", "http://172.16.6.11:35357/v2.0")
     i = nova.images.find(name="CentOS-6.6")
     f = nova.flavors.find(name="m1.medium")
-    instance = nova.servers.create(name='%s'%namespace,image=i.id,flavor=f.id)
+    cmd = "echo 'hello_world' > /root/op.txt\n"
+    ci = "#cloud-config\nruncmd:\n - " + cmd
+    instance = nova.servers.create(name='%s'%namespace,image=i.id,flavor=f.id,userdata=ci,key_name="temp_key")
     server_id = instance.id
     if waitUntil(checkVM,120,1,nova,server_id):
         return server_id

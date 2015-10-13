@@ -202,6 +202,7 @@
 		$("#div_register").hide();
 		$("#r_name").val("");
 		$("#r_passwd").val("");
+		$("#r_cpasswd").val("");
 	}
 	function show_register(){
 		$("#div_login").hide();
@@ -238,14 +239,14 @@
                                 	} else if(data["tip"] == "no"){
                                         	$("#span_r_tip").text("User name already registered!");
 					} else {
-                                        	$("#span_r_tip").text("Setting up VM failed!");
+                                        	$("#span_r_tip").text("Setting up environment failed!");
                                 	}
                         	},
                         	complete:function(data,textStatus){
                         	}
                         
                 	});
-			$("#span_r_tip").text("Registering and setting up your CDAP VM..");
+			$("#span_r_tip").text("Registering and setting up your CDAP environment..");
 		}
 
 	}
